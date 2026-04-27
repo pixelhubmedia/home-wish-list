@@ -31,28 +31,35 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
-    // Create house
-    const { data: house, error: houseError } = await supabase
-      .from('houses')
-      .insert({ name: houseName.trim(), invite_code: generateInviteCode(), owner_id: user.id })
-      .select()
-      .single()
+    // Generate the house ID client-side so we can insert member + rooms
+    // without needing to SELECT the house back (SELECT policy requires membership)
+    const houseId = crypto.randomUUID()
 
-    if (houseError || !house) {
-      setError(houseError?.message || 'Failed to create house.')
+    const { error: houseError } = await supabase
+      .from('houses')
+      .insert({ id: houseId, name: houseName.trim(), invite_code: generateInviteCode(), owner_id: user.id })
+
+    if (houseError) {
+      setError(houseError.message)
       setLoading(false)
       return
     }
 
-    // Add owner as member
-    await supabase.from('house_members').insert({
-      house_id: house.id,
+    // Add owner as member (must happen before any SELECT on houses)
+    const { error: memberError } = await supabase.from('house_members').insert({
+      house_id: houseId,
       user_id: user.id,
       role: 'owner',
     })
 
+    if (memberError) {
+      setError(memberError.message)
+      setLoading(false)
+      return
+    }
+
     // Create default rooms
-    const rooms = DEFAULT_ROOMS.map((name) => ({ house_id: house.id, name }))
+    const rooms = DEFAULT_ROOMS.map((name) => ({ house_id: houseId, name }))
     await supabase.from('rooms').insert(rooms)
 
     router.push('/dashboard')
