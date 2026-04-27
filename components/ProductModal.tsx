@@ -41,12 +41,23 @@ export default function ProductModal({ roomId, houseId, userId, groupOptions = [
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
       })
+
+      if (!res.ok) {
+        setFetchError('Enter a valid product URL.')
+        return
+      }
+
       const data: ProductMetadata = await res.json()
 
+      if (data.product_url) setUrl(data.product_url)
       if (data.title) setTitle(data.title)
       if (data.image_url) setImageUrl(data.image_url)
       if (data.price) setPrice(data.price.toString())
       if (data.retailer) setRetailer(data.retailer)
+
+      if (!data.title && !data.image_url && !data.price) {
+        setFetchError('This site blocked automatic details. Add the product manually.')
+      }
     } catch {
       setFetchError('Could not fetch product details. Please fill in manually.')
     } finally {
