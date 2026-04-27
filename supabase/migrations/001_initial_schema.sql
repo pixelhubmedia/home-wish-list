@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS public.wishlist_items (
   image_url   TEXT,
   retailer    TEXT,
   price       NUMERIC(10, 2),
+  comparison_group TEXT,
   notes       TEXT,
   status      TEXT NOT NULL DEFAULT 'Wishlist'
                 CHECK (status IN ('Wishlist','Considering','Purchased','Not buying')),

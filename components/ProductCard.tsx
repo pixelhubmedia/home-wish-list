@@ -77,6 +77,11 @@ export default function ProductCard({ item, onEdit, onDelete, onStatusChange }: 
               {item.retailer}
             </span>
           )}
+          {item.comparison_group && (
+            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg">
+              {item.comparison_group}
+            </span>
+          )}
           <button
             onClick={() => setShowStatusMenu(!showStatusMenu)}
             className="text-xs font-semibold px-2 py-0.5 rounded-lg transition-all"

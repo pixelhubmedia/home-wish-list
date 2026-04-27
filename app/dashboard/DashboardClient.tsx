@@ -12,7 +12,6 @@ interface Props {
   house: House
   rooms: Room[]
   items: WishlistItem[]
-  userId: string
 }
 
 function formatPrice(p: number) {
@@ -23,7 +22,7 @@ function calcTotal(items: WishlistItem[]) {
   return items.reduce((s, i) => s + (i.price || 0), 0)
 }
 
-export default function DashboardClient({ house, rooms: initialRooms, items, userId }: Props) {
+export default function DashboardClient({ house, rooms: initialRooms, items }: Props) {
   const router = useRouter()
   const [rooms, setRooms] = useState(initialRooms)
   const [showAddRoom, setShowAddRoom] = useState(false)

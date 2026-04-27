@@ -41,6 +41,7 @@ export type WishlistItem = {
   image_url: string | null
   retailer: string | null
   price: number | null
+  comparison_group: string | null
   notes: string | null
   status: WishlistItemStatus
   created_at: string

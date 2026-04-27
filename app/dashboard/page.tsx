@@ -42,7 +42,6 @@ export default async function DashboardPage() {
       house={house}
       rooms={rooms || []}
       items={items || []}
-      userId={user.id}
     />
   )
 }

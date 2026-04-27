@@ -8,6 +8,7 @@ interface Props {
   roomId: string
   houseId: string
   userId: string
+  groupOptions?: string[]
   editItem: WishlistItem | null
   onClose: () => void
   onSaved: (item: WishlistItem) => void
@@ -15,12 +16,13 @@ interface Props {
 
 const STATUSES: WishlistItemStatus[] = ['Wishlist', 'Considering', 'Purchased', 'Not buying']
 
-export default function ProductModal({ roomId, houseId, userId, editItem, onClose, onSaved }: Props) {
+export default function ProductModal({ roomId, houseId, userId, groupOptions = [], editItem, onClose, onSaved }: Props) {
   const [url, setUrl] = useState(editItem?.product_url || '')
   const [title, setTitle] = useState(editItem?.title || '')
   const [imageUrl, setImageUrl] = useState(editItem?.image_url || '')
   const [price, setPrice] = useState<string>(editItem?.price?.toString() || '')
   const [retailer, setRetailer] = useState(editItem?.retailer || '')
+  const [comparisonGroup, setComparisonGroup] = useState(editItem?.comparison_group || '')
   const [notes, setNotes] = useState(editItem?.notes || '')
   const [status, setStatus] = useState<WishlistItemStatus>(editItem?.status || 'Wishlist')
   const [fetching, setFetching] = useState(false)
@@ -73,6 +75,7 @@ export default function ProductModal({ roomId, houseId, userId, editItem, onClos
       image_url: imageUrl.trim() || null,
       price: price ? parseFloat(price) : null,
       retailer: retailer.trim() || null,
+      comparison_group: comparisonGroup.trim() || null,
       notes: notes.trim() || null,
       status,
       updated_at: new Date().toISOString(),
@@ -227,6 +230,27 @@ export default function ProductModal({ roomId, houseId, userId, editItem, onClos
                   onChange={(e) => setRetailer(e.target.value)}
                 />
               </div>
+            </div>
+
+            {/* Comparison group */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Compare with</label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="e.g. Sofa options"
+                value={comparisonGroup}
+                onChange={(e) => setComparisonGroup(e.target.value)}
+                list="comparison-groups"
+              />
+              <datalist id="comparison-groups">
+                {groupOptions.map((group) => (
+                  <option key={group} value={group} />
+                ))}
+              </datalist>
+              <p className="text-xs text-gray-400 mt-1">
+                Use the same name on similar items to compare them together.
+              </p>
             </div>
 
             {/* Status */}

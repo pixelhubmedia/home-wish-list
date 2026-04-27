@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Room, WishlistItem, WishlistItemStatus } from '@/types'
@@ -28,14 +27,34 @@ function formatPrice(p: number) {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(p)
 }
 
+function groupComparisonItems(items: WishlistItem[]) {
+  const groups = new Map<string, WishlistItem[]>()
+
+  for (const item of items) {
+    const group = item.comparison_group?.trim()
+    if (!group) continue
+    groups.set(group, [...(groups.get(group) || []), item])
+  }
+
+  return Array.from(groups.entries())
+    .map(([name, groupItems]) => ({
+      name,
+      items: groupItems.sort((a, b) => (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
 export default function RoomClient({ room, items: initialItems, userId }: Props) {
-  const router = useRouter()
   const [items, setItems] = useState(initialItems)
   const [filter, setFilter] = useState<WishlistItemStatus | 'All'>('All')
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState<WishlistItem | null>(null)
 
   const filtered = filter === 'All' ? items : items.filter((i) => i.status === filter)
+  const comparisonGroups = groupComparisonItems(filtered)
+  const groupOptions = Array.from(
+    new Set(items.map((item) => item.comparison_group?.trim()).filter((group): group is string => Boolean(group)))
+  ).sort((a, b) => a.localeCompare(b))
 
   const roomTotal = items
     .filter((i) => i.status !== 'Not buying')
@@ -128,6 +147,89 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
           ))}
         </div>
 
+        {/* Comparison groups */}
+        {comparisonGroups.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-800">Compare options</h2>
+              <span className="text-xs font-semibold text-gray-400">
+                {comparisonGroups.length} group{comparisonGroups.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            {comparisonGroups.map((group) => {
+              const groupTotal = group.items.reduce((sum, item) => sum + (item.price || 0), 0)
+              const cheapest = group.items.find((item) => item.price !== null)
+
+              return (
+                <div key={group.name} className="glass-card overflow-hidden">
+                  <div className="p-4 border-b border-white/60">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-bold text-gray-800">{group.name}</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {group.items.length} option{group.items.length !== 1 ? 's' : ''} compared
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400">Group total</p>
+                        <p className="text-sm font-bold text-blue-600">{formatPrice(groupTotal)}</p>
+                      </div>
+                    </div>
+                    {cheapest && (
+                      <p className="mt-2 text-xs text-green-600 font-semibold">
+                        Lowest price: {cheapest.title} at {formatPrice(cheapest.price || 0)}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-left">
+                      <thead>
+                        <tr className="text-xs text-gray-400 uppercase tracking-wider">
+                          <th className="px-4 py-2 font-bold">Product</th>
+                          <th className="px-3 py-2 font-bold">Price</th>
+                          <th className="px-3 py-2 font-bold">Retailer</th>
+                          <th className="px-3 py-2 font-bold">Status</th>
+                          <th className="px-3 py-2 font-bold">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.items.map((item) => (
+                          <tr key={item.id} className="border-t border-white/60 align-top">
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => handleEdit(item)}
+                                className="font-semibold text-gray-800 text-sm text-left hover:text-blue-600"
+                              >
+                                {item.title}
+                              </button>
+                            </td>
+                            <td className="px-3 py-3 text-sm font-bold text-blue-600 whitespace-nowrap">
+                              {item.price !== null ? formatPrice(item.price) : 'N/A'}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-gray-600">
+                              {item.retailer || 'N/A'}
+                            </td>
+                            <td className="px-3 py-3">
+                              <span className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/80 text-gray-600 whitespace-nowrap">
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3 text-sm text-gray-500 max-w-[220px]">
+                              {item.notes || 'N/A'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )
+            })}
+          </section>
+        )}
+
         {/* Items */}
         {filtered.length === 0 ? (
           <div className="glass-card p-10 text-center">
@@ -159,6 +261,7 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
           roomId={room.id}
           houseId={room.house_id}
           userId={userId}
+          groupOptions={groupOptions}
           editItem={editItem}
           onClose={() => { setShowModal(false); setEditItem(null) }}
           onSaved={handleSaved}
