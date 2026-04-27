@@ -93,6 +93,29 @@ RETURNS BOOLEAN AS $$
   );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
+-- ---- Drop all policies first so this script is re-runnable ----
+DROP POLICY IF EXISTS "Users can view their own profile"     ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile"   ON public.profiles;
+
+DROP POLICY IF EXISTS "Members can view their house"              ON public.houses;
+DROP POLICY IF EXISTS "Authenticated users can create a house"    ON public.houses;
+DROP POLICY IF EXISTS "Owner can update the house"                ON public.houses;
+DROP POLICY IF EXISTS "Owner can delete the house"                ON public.houses;
+
+DROP POLICY IF EXISTS "Members can view house member list"    ON public.house_members;
+DROP POLICY IF EXISTS "Authenticated users can join a house"  ON public.house_members;
+DROP POLICY IF EXISTS "Users can leave a house"               ON public.house_members;
+
+DROP POLICY IF EXISTS "Members can view rooms"    ON public.rooms;
+DROP POLICY IF EXISTS "Members can create rooms"  ON public.rooms;
+DROP POLICY IF EXISTS "Members can update rooms"  ON public.rooms;
+DROP POLICY IF EXISTS "Members can delete rooms"  ON public.rooms;
+
+DROP POLICY IF EXISTS "Members can view wishlist items"    ON public.wishlist_items;
+DROP POLICY IF EXISTS "Members can create wishlist items"  ON public.wishlist_items;
+DROP POLICY IF EXISTS "Members can update wishlist items"  ON public.wishlist_items;
+DROP POLICY IF EXISTS "Members can delete wishlist items"  ON public.wishlist_items;
+
 -- ---- profiles ----
 CREATE POLICY "Users can view their own profile"
   ON public.profiles FOR SELECT
