@@ -89,20 +89,18 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
     <div className="min-h-screen safe-bottom">
       <Header title={house.name} subtitle="Your home wish list" />
 
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6">
+      <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Invite code */}
         <div className="glass-card p-4 flex items-center justify-between">
           <div>
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Invite code</p>
-            <p className="text-2xl font-bold text-blue-600 tracking-widest mt-0.5">{house.invite_code}</p>
+            <p className="text-xl font-semibold text-gray-950 tracking-widest mt-0.5">{house.invite_code}</p>
           </div>
           <button
             onClick={copyInviteCode}
-            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-            style={{
-              background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(79,156,249,0.15)',
-              color: copied ? '#16a34a' : '#2563eb',
-            }}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+              copied ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-700'
+            }`}
           >
             {copied ? 'Copied!' : 'Copy'}
           </button>
@@ -111,9 +109,9 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
         {/* Budget summary */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Total', value: totalAll, color: '#4f9cf9' },
-            { label: 'Purchased', value: totalPurchased, color: '#22c55e' },
-            { label: 'Remaining', value: totalWishlist, color: '#a78bfa' },
+            { label: 'Total', value: totalAll, color: '#2563eb' },
+            { label: 'Purchased', value: totalPurchased, color: '#16a34a' },
+            { label: 'Remaining', value: totalWishlist, color: '#475467' },
           ].map((stat) => (
             <div key={stat.label} className="glass-card p-3 text-center">
               <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
@@ -127,7 +125,7 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
         {/* Insights */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-800">Insights</h2>
+            <h2 className="text-lg font-semibold text-gray-950">Insights</h2>
             <span className="text-xs font-semibold text-gray-400">
               {purchasedPercentage}% purchased
             </span>
@@ -136,7 +134,7 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
           <div className="grid grid-cols-2 gap-3">
             <div className="glass-card p-4">
               <p className="text-xs text-gray-500 font-medium">Most expensive room</p>
-              <p className="font-bold text-gray-800 mt-1 truncate">
+              <p className="font-semibold text-gray-950 mt-1 truncate">
                 {mostExpensiveRoom && mostExpensiveRoom.total > 0 ? mostExpensiveRoom.name : 'No spend yet'}
               </p>
               <p className="text-sm font-bold text-blue-600 mt-1">
@@ -146,7 +144,7 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
 
             <div className="glass-card p-4">
               <p className="text-xs text-gray-500 font-medium">Remaining items</p>
-              <p className="font-bold text-gray-800 mt-1">
+              <p className="font-semibold text-gray-950 mt-1">
                 {remainingItemsCount} item{remainingItemsCount !== 1 ? 's' : ''}
               </p>
               <p className="text-xs text-gray-400 mt-1">Wishlist and considering</p>
@@ -154,7 +152,7 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
 
             <div className="glass-card p-4">
               <p className="text-xs text-gray-500 font-medium">Purchased progress</p>
-              <p className="font-bold text-gray-800 mt-1">{purchasedPercentage}% complete</p>
+              <p className="font-semibold text-gray-950 mt-1">{purchasedPercentage}% complete</p>
               <div className="h-2 rounded-full bg-gray-100 mt-3 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-green-500 transition-all"
@@ -165,7 +163,7 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
 
             <div className="glass-card p-4">
               <p className="text-xs text-gray-500 font-medium">Wishlist + considering</p>
-              <p className="font-bold text-purple-600 mt-1">{formatPrice(totalWithConsidering)}</p>
+              <p className="font-semibold text-gray-950 mt-1">{formatPrice(totalWithConsidering)}</p>
               <p className="text-xs text-gray-400 mt-1">
                 {formatPrice(totalWishlistOnly)} wishlist + {formatPrice(totalConsidering)} considering
               </p>
@@ -176,13 +174,12 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
         {/* Rooms */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-800">Rooms</h2>
+            <h2 className="text-lg font-semibold text-gray-950">Rooms</h2>
             <button
               onClick={() => setShowAddRoom(!showAddRoom)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold"
-              style={{ background: 'rgba(79,156,249,0.15)', color: '#2563eb' }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
-              + Add room
+              Add room
             </button>
           </div>
 
@@ -205,23 +202,20 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
 
           {rooms.length === 0 ? (
             <div className="glass-card p-8 text-center">
-              <p className="text-4xl mb-2">🛋️</p>
+              <div className="w-10 h-10 rounded-md bg-gray-100 mx-auto mb-3" />
               <p className="text-gray-500 text-sm">No rooms yet. Add your first room above.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {rooms.map((room) => (
                 <Link key={room.id} href={`/dashboard/rooms/${room.id}`}>
-                  <div className="glass-card p-4 flex items-center justify-between active:scale-[0.98] transition-transform">
+                  <div className="glass-card p-4 flex items-center justify-between hover:border-gray-300 active:scale-[0.99] transition-all">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                        style={{ background: 'linear-gradient(135deg, rgba(79,156,249,0.15), rgba(167,139,250,0.15))' }}
-                      >
-                        {getRoomIcon(room.name)}
+                      <div className="w-10 h-10 rounded-md bg-gray-100 text-gray-700 flex items-center justify-center text-sm font-semibold">
+                        {getRoomInitial(room.name)}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">{room.name}</p>
+                        <p className="font-semibold text-gray-950">{room.name}</p>
                         <p className="text-xs text-gray-500">
                           {roomItemCount(room.id)} item{roomItemCount(room.id) !== 1 ? 's' : ''}
                         </p>
@@ -232,7 +226,7 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
                         <p className="text-sm font-bold text-blue-600">{formatPrice(roomCost(room.id))}</p>
                         <p className="text-xs text-gray-400">remaining</p>
                       </div>
-                      <span className="text-gray-300">›</span>
+                      <span className="text-gray-400">/</span>
                     </div>
                   </div>
                 </Link>
@@ -247,16 +241,6 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
   )
 }
 
-function getRoomIcon(name: string) {
-  const n = name.toLowerCase()
-  if (n.includes('bed')) return '🛏️'
-  if (n.includes('kitchen')) return '🍳'
-  if (n.includes('bath')) return '🛁'
-  if (n.includes('living')) return '🛋️'
-  if (n.includes('dining')) return '🍽️'
-  if (n.includes('office') || n.includes('study')) return '💻'
-  if (n.includes('garden') || n.includes('outdoor')) return '🌿'
-  if (n.includes('garage')) return '🚗'
-  if (n.includes('hall') || n.includes('entry')) return '🚪'
-  return '🏠'
+function getRoomInitial(name: string) {
+  return name.trim().slice(0, 1).toUpperCase() || 'R'
 }

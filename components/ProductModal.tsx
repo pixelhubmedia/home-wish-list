@@ -117,17 +117,14 @@ export default function ProductModal({ roomId, houseId, userId, groupOptions = [
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
 
       {/* Sheet */}
       <div
-        className="relative w-full max-w-lg sm:max-h-[90vh] overflow-y-auto sm:rounded-3xl rounded-t-3xl"
+        className="relative w-full max-w-lg sm:max-h-[90vh] overflow-y-auto sm:rounded-lg rounded-t-lg bg-white shadow-xl"
         style={{
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(24px)',
-          boxShadow: '0 24px 64px rgba(31,38,135,0.2)',
           maxHeight: '92dvh',
         }}
       >
@@ -138,12 +135,12 @@ export default function ProductModal({ roomId, houseId, userId, groupOptions = [
 
         <div className="px-6" style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-xl font-semibold text-gray-950">
               {editItem ? 'Edit product' : 'Add product'}
             </h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-lg"
+              className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 text-lg hover:bg-gray-200"
             >
               ×
             </button>
@@ -151,7 +148,7 @@ export default function ProductModal({ roomId, houseId, userId, groupOptions = [
 
           <form onSubmit={handleSave} className="flex flex-col gap-4">
             {saveError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3">
                 {saveError}
               </div>
             )}
@@ -171,8 +168,7 @@ export default function ProductModal({ roomId, houseId, userId, groupOptions = [
                   type="button"
                   onClick={fetchProduct}
                   disabled={!url || fetching}
-                  className="flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
-                  style={{ background: 'rgba(79,156,249,0.2)', color: '#2563eb' }}
+                  className="flex-shrink-0 px-4 py-2.5 rounded-md text-sm font-semibold transition-all disabled:opacity-50 bg-gray-100 text-gray-700 hover:bg-gray-200"
                 >
                   {fetching ? '⟳' : 'Fetch'}
                 </button>
@@ -262,9 +258,9 @@ export default function ProductModal({ roomId, houseId, userId, groupOptions = [
                     key={s}
                     type="button"
                     onClick={() => setStatus(s)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                       status === s
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-gray-950 text-white'
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >

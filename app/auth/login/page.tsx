@@ -31,25 +31,20 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-gray-50">
       <div className="w-full max-w-sm">
-        {/* Header */}
         <div className="text-center mb-8">
-          <div
-            className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, #4f9cf9 0%, #a78bfa 100%)' }}
-          >
-            <span className="text-3xl">🏠</span>
+          <div className="w-10 h-10 mx-auto rounded-md bg-gray-950 text-white flex items-center justify-center mb-4 text-sm font-semibold">
+            HW
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Welcome back</h1>
+          <h1 className="text-2xl font-semibold text-gray-950">Welcome back</h1>
           <p className="text-gray-500 mt-1 text-sm">Sign in to your home wish list</p>
         </div>
 
-        {/* Card */}
         <div className="glass-card p-6">
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3">
                 {error}
               </div>
             )}
@@ -88,7 +83,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="text-blue-500 font-semibold">
+          <Link href="/auth/signup" className="text-blue-600 font-semibold">
             Create one
           </Link>
         </p>

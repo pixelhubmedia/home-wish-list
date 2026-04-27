@@ -2,55 +2,53 @@ import Link from 'next/link'
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-        {/* Logo */}
-        <div className="mb-8">
-          <div
-            className="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, #4f9cf9 0%, #a78bfa 100%)' }}
-          >
-            <span className="text-4xl">🏠</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Home Wish List</h1>
-          <p className="text-lg text-gray-500 font-medium">Plan your dream home, together.</p>
-        </div>
-
-        {/* Tagline */}
-        <div className="glass-card p-6 w-full max-w-sm mb-8">
-          <p className="text-gray-600 text-base leading-relaxed">
-            Save products from any retailer, organise by room, track your budget,
-            and share with your partner — all in one place.
-          </p>
-        </div>
-
-        {/* CTAs */}
-        <div className="flex flex-col gap-3 w-full max-w-sm">
-          <Link href="/auth/signup" className="block">
-            <button className="btn-primary">Get started free</button>
-          </Link>
-          <Link href="/auth/login" className="block">
-            <button className="btn-secondary">Sign in</button>
-          </Link>
-        </div>
-
-        {/* Features */}
-        <div className="mt-12 flex flex-col gap-3 w-full max-w-sm">
-          {[
-            { icon: '🛋️', title: 'Organised by room', desc: 'Bedroom, kitchen, bathroom and more' },
-            { icon: '💰', title: 'Budget tracking', desc: 'See total cost per room and whole house' },
-            { icon: '🔗', title: 'Paste any URL', desc: 'Auto-fetch product details from any store' },
-            { icon: '👫', title: 'Share with partner', desc: 'Invite code to collaborate together' },
-          ].map((f) => (
-            <div key={f.title} className="glass-card p-4 flex items-center gap-4 text-left">
-              <span className="text-2xl">{f.icon}</span>
-              <div>
-                <p className="font-semibold text-gray-800 text-sm">{f.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{f.desc}</p>
-              </div>
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl mx-auto px-6 py-6">
+        <nav className="flex items-center justify-between py-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-gray-950 text-white flex items-center justify-center text-sm font-semibold">
+              HW
             </div>
-          ))}
-        </div>
+            <span className="font-semibold text-gray-950">Home Wish List</span>
+          </div>
+          <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-950">
+            Sign in
+          </Link>
+        </nav>
+
+        <section className="py-16 sm:py-24">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-blue-600 mb-4">Home planning for shared decisions</p>
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-normal text-gray-950 leading-tight">
+              Build a practical buying plan for every room.
+            </h1>
+            <p className="text-lg text-gray-600 mt-5 leading-8">
+              Save products, compare options, track spend, and make decisions with your partner before you buy.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-8 max-w-md">
+              <Link href="/auth/signup" className="flex-1">
+                <button className="btn-primary">Get started</button>
+              </Link>
+              <Link href="/auth/login" className="flex-1">
+                <button className="btn-secondary">Sign in</button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { title: 'Rooms', desc: 'Keep purchases organised by space.' },
+              { title: 'Budget', desc: 'Track costs before you commit.' },
+              { title: 'Compare', desc: 'Review similar products side by side.' },
+              { title: 'Decide', desc: 'Use partner votes to agree faster.' },
+            ].map((f) => (
+              <div key={f.title} className="glass-card p-5">
+                <p className="font-semibold text-gray-950 text-sm">{f.title}</p>
+                <p className="text-gray-500 text-sm mt-2 leading-6">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   )

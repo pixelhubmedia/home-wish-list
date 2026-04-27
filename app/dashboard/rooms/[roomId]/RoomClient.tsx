@@ -3,7 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Room, WishlistItem, WishlistItemStatus } from '@/types'
+import {
+  Room,
+  WishlistItem,
+  WishlistItemReactionCounts,
+  WishlistItemReactionValue,
+  WishlistItemStatus,
+  WishlistItemWithReactions,
+} from '@/types'
 import BottomNav from '@/components/BottomNav'
 import Header from '@/components/Header'
 import ProductModal from '@/components/ProductModal'
@@ -11,8 +18,14 @@ import ProductCard from '@/components/ProductCard'
 
 interface Props {
   room: Room
-  items: WishlistItem[]
+  items: WishlistItemWithReactions[]
   userId: string
+}
+
+const EMPTY_REACTION_COUNTS: WishlistItemReactionCounts = {
+  approve: 0,
+  unsure: 0,
+  dislike: 0,
 }
 
 const STATUS_FILTERS: { label: string; value: WishlistItemStatus | 'All' }[] = [
@@ -27,8 +40,8 @@ function formatPrice(p: number) {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(p)
 }
 
-function groupComparisonItems(items: WishlistItem[]) {
-  const groups = new Map<string, WishlistItem[]>()
+function groupComparisonItems(items: WishlistItemWithReactions[]) {
+  const groups = new Map<string, WishlistItemWithReactions[]>()
 
   for (const item of items) {
     const group = item.comparison_group?.trim()
@@ -68,18 +81,53 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
     .filter((i) => i.status === 'Purchased')
     .reduce((s, i) => s + (i.price || 0), 0)
 
+  function withReactionDefaults(item: WishlistItem): WishlistItemWithReactions {
+    return {
+      ...item,
+      reaction_counts: 'reaction_counts' in item ? item.reaction_counts : { ...EMPTY_REACTION_COUNTS },
+      current_user_reaction: 'current_user_reaction' in item ? item.current_user_reaction : null,
+    } as WishlistItemWithReactions
+  }
+
   function handleSaved(item: WishlistItem) {
+    const itemWithReactions = withReactionDefaults(item)
     setItems((prev) => {
-      const idx = prev.findIndex((i) => i.id === item.id)
+      const idx = prev.findIndex((i) => i.id === itemWithReactions.id)
       if (idx >= 0) {
         const updated = [...prev]
-        updated[idx] = item
+        updated[idx] = {
+          ...itemWithReactions,
+          reaction_counts: prev[idx].reaction_counts,
+          current_user_reaction: prev[idx].current_user_reaction,
+        }
         return updated
       }
-      return [item, ...prev]
+      return [itemWithReactions, ...prev]
     })
     setShowModal(false)
     setEditItem(null)
+  }
+
+  function handleReactionChange(
+    itemId: string,
+    previousReaction: WishlistItemReactionValue | null,
+    nextReaction: WishlistItemReactionValue | null
+  ) {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== itemId) return item
+
+        const counts = { ...item.reaction_counts }
+        if (previousReaction) counts[previousReaction] = Math.max(0, counts[previousReaction] - 1)
+        if (nextReaction) counts[nextReaction] += 1
+
+        return {
+          ...item,
+          reaction_counts: counts,
+          current_user_reaction: nextReaction,
+        }
+      })
+    )
   }
 
   async function handleDelete(id: string) {
@@ -99,19 +147,19 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
         title={room.name}
         subtitle={`${items.length} item${items.length !== 1 ? 's' : ''}`}
         action={
-          <Link href="/dashboard" className="text-blue-500 text-sm font-semibold">
-            ← Back
+          <Link href="/dashboard" className="text-gray-600 hover:text-gray-950 text-sm font-semibold">
+            Back
           </Link>
         }
       />
 
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-5">
+      <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col gap-5">
         {/* Room cost summary */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Total', value: roomTotal, color: '#4f9cf9' },
-            { label: 'Purchased', value: purchasedTotal, color: '#22c55e' },
-            { label: 'Wishlist', value: wishlistTotal, color: '#a78bfa' },
+            { label: 'Total', value: roomTotal, color: '#2563eb' },
+            { label: 'Purchased', value: purchasedTotal, color: '#16a34a' },
+            { label: 'Wishlist', value: wishlistTotal, color: '#475467' },
           ].map((s) => (
             <div key={s.label} className="glass-card p-3 text-center">
               <p className="text-xs text-gray-500 font-medium">{s.label}</p>
@@ -127,7 +175,7 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
           onClick={() => { setEditItem(null); setShowModal(true) }}
           className="btn-primary"
         >
-          + Add product
+          Add product
         </button>
 
         {/* Status filter */}
@@ -136,10 +184,10 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 filter === f.value
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-white/70 text-gray-600'
+                  ? 'bg-gray-950 text-white'
+                  : 'bg-white border border-gray-200 text-gray-600'
               }`}
             >
               {f.label}
@@ -151,7 +199,7 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
         {comparisonGroups.length > 0 && (
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-800">Compare options</h2>
+              <h2 className="text-lg font-semibold text-gray-950">Compare options</h2>
               <span className="text-xs font-semibold text-gray-400">
                 {comparisonGroups.length} group{comparisonGroups.length !== 1 ? 's' : ''}
               </span>
@@ -163,10 +211,10 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
 
               return (
                 <div key={group.name} className="glass-card overflow-hidden">
-                  <div className="p-4 border-b border-white/60">
+                  <div className="p-4 border-b border-gray-200">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-bold text-gray-800">{group.name}</h3>
+                        <h3 className="font-semibold text-gray-950">{group.name}</h3>
                         <p className="text-xs text-gray-500 mt-0.5">
                           {group.items.length} option{group.items.length !== 1 ? 's' : ''} compared
                         </p>
@@ -190,17 +238,18 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
                           <th className="px-4 py-2 font-bold">Product</th>
                           <th className="px-3 py-2 font-bold">Price</th>
                           <th className="px-3 py-2 font-bold">Retailer</th>
+                          <th className="px-3 py-2 font-bold">Votes</th>
                           <th className="px-3 py-2 font-bold">Status</th>
                           <th className="px-3 py-2 font-bold">Notes</th>
                         </tr>
                       </thead>
                       <tbody>
                         {group.items.map((item) => (
-                          <tr key={item.id} className="border-t border-white/60 align-top">
+                          <tr key={item.id} className="border-t border-gray-100 align-top">
                             <td className="px-4 py-3">
                               <button
                                 onClick={() => handleEdit(item)}
-                                className="font-semibold text-gray-800 text-sm text-left hover:text-blue-600"
+                                className="font-semibold text-gray-950 text-sm text-left hover:text-blue-600"
                               >
                                 {item.title}
                               </button>
@@ -211,8 +260,11 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
                             <td className="px-3 py-3 text-sm text-gray-600">
                               {item.retailer || 'N/A'}
                             </td>
+                            <td className="px-3 py-3 text-xs text-gray-600 whitespace-nowrap">
+                              {item.reaction_counts.approve} approve, {item.reaction_counts.unsure} unsure, {item.reaction_counts.dislike} dislike
+                            </td>
                             <td className="px-3 py-3">
-                              <span className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/80 text-gray-600 whitespace-nowrap">
+                              <span className="text-xs font-semibold px-2 py-1 rounded-md bg-gray-100 text-gray-600 whitespace-nowrap">
                                 {item.status}
                               </span>
                             </td>
@@ -233,8 +285,8 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
         {/* Items */}
         {filtered.length === 0 ? (
           <div className="glass-card p-10 text-center">
-            <p className="text-4xl mb-3">🛍️</p>
-            <p className="text-gray-600 font-semibold">No items yet</p>
+            <div className="w-10 h-10 rounded-md bg-gray-100 mx-auto mb-3" />
+            <p className="text-gray-700 font-semibold">No items yet</p>
             <p className="text-gray-400 text-sm mt-1">Tap &quot;Add product&quot; to start your wish list</p>
           </div>
         ) : (
@@ -243,6 +295,7 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
               <ProductCard
                 key={item.id}
                 item={item}
+                userId={userId}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onStatusChange={(id, status) => {
@@ -250,6 +303,7 @@ export default function RoomClient({ room, items: initialItems, userId }: Props)
                     prev.map((i) => (i.id === id ? { ...i, status } : i))
                   )
                 }}
+                onReactionChange={handleReactionChange}
               />
             ))}
           </div>

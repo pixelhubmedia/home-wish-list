@@ -30,6 +30,9 @@ export type Room = {
 }
 
 export type WishlistItemStatus = 'Wishlist' | 'Considering' | 'Purchased' | 'Not buying'
+export type WishlistItemReactionValue = 'approve' | 'unsure' | 'dislike'
+
+export type WishlistItemReactionCounts = Record<WishlistItemReactionValue, number>
 
 export type WishlistItem = {
   id: string
@@ -46,6 +49,20 @@ export type WishlistItem = {
   status: WishlistItemStatus
   created_at: string
   updated_at: string
+}
+
+export type WishlistItemReaction = {
+  id: string
+  item_id: string
+  user_id: string
+  reaction: WishlistItemReactionValue
+  created_at: string
+  updated_at: string
+}
+
+export type WishlistItemWithReactions = WishlistItem & {
+  reaction_counts: WishlistItemReactionCounts
+  current_user_reaction: WishlistItemReactionValue | null
 }
 
 export type ProductMetadata = {
