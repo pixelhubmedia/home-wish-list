@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { WishlistItem, WishlistItemStatus, ProductMetadata } from '@/types'
 
@@ -111,7 +111,7 @@ export default function ProductModal({ roomId, houseId, userId, editItem, onClos
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
@@ -120,11 +120,12 @@ export default function ProductModal({ roomId, houseId, userId, editItem, onClos
 
       {/* Sheet */}
       <div
-        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl"
+        className="relative w-full max-w-lg sm:max-h-[90vh] overflow-y-auto sm:rounded-3xl rounded-t-3xl"
         style={{
           background: 'rgba(255,255,255,0.92)',
           backdropFilter: 'blur(24px)',
           boxShadow: '0 24px 64px rgba(31,38,135,0.2)',
+          maxHeight: '92dvh',
         }}
       >
         {/* Handle */}
@@ -132,7 +133,7 @@ export default function ProductModal({ roomId, houseId, userId, editItem, onClos
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
 
-        <div className="px-6 pb-6">
+        <div className="px-6" style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-bold text-gray-800">
               {editItem ? 'Edit product' : 'Add product'}
