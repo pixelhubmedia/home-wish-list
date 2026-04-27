@@ -32,10 +32,23 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
   const [copied, setCopied] = useState(false)
 
   const wishlistItems = items.filter(i => i.status !== 'Purchased' && i.status !== 'Not buying')
+  const wishlistOnlyItems = items.filter(i => i.status === 'Wishlist')
+  const consideringItems = items.filter(i => i.status === 'Considering')
   const purchasedItems = items.filter(i => i.status === 'Purchased')
   const totalWishlist = calcTotal(wishlistItems)
+  const totalWishlistOnly = calcTotal(wishlistOnlyItems)
+  const totalConsidering = calcTotal(consideringItems)
   const totalPurchased = calcTotal(purchasedItems)
   const totalAll = calcTotal(items.filter(i => i.status !== 'Not buying'))
+  const remainingItemsCount = wishlistItems.length
+  const purchasedPercentage = totalAll > 0 ? Math.round((totalPurchased / totalAll) * 100) : 0
+  const totalWithConsidering = totalWishlistOnly + totalConsidering
+  const mostExpensiveRoom = rooms
+    .map((room) => ({
+      ...room,
+      total: calcTotal(items.filter(i => i.room_id === room.id && i.status !== 'Not buying')),
+    }))
+    .sort((a, b) => b.total - a.total)[0]
 
   function roomCost(roomId: string) {
     return calcTotal(items.filter(i => i.room_id === roomId && i.status !== 'Not buying' && i.status !== 'Purchased'))
@@ -109,6 +122,55 @@ export default function DashboardClient({ house, rooms: initialRooms, items }: P
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Insights */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-gray-800">Insights</h2>
+            <span className="text-xs font-semibold text-gray-400">
+              {purchasedPercentage}% purchased
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="glass-card p-4">
+              <p className="text-xs text-gray-500 font-medium">Most expensive room</p>
+              <p className="font-bold text-gray-800 mt-1 truncate">
+                {mostExpensiveRoom && mostExpensiveRoom.total > 0 ? mostExpensiveRoom.name : 'No spend yet'}
+              </p>
+              <p className="text-sm font-bold text-blue-600 mt-1">
+                {mostExpensiveRoom && mostExpensiveRoom.total > 0 ? formatPrice(mostExpensiveRoom.total) : formatPrice(0)}
+              </p>
+            </div>
+
+            <div className="glass-card p-4">
+              <p className="text-xs text-gray-500 font-medium">Remaining items</p>
+              <p className="font-bold text-gray-800 mt-1">
+                {remainingItemsCount} item{remainingItemsCount !== 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Wishlist and considering</p>
+            </div>
+
+            <div className="glass-card p-4">
+              <p className="text-xs text-gray-500 font-medium">Purchased progress</p>
+              <p className="font-bold text-gray-800 mt-1">{purchasedPercentage}% complete</p>
+              <div className="h-2 rounded-full bg-gray-100 mt-3 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-green-500 transition-all"
+                  style={{ width: `${purchasedPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="glass-card p-4">
+              <p className="text-xs text-gray-500 font-medium">Wishlist + considering</p>
+              <p className="font-bold text-purple-600 mt-1">{formatPrice(totalWithConsidering)}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                {formatPrice(totalWishlistOnly)} wishlist + {formatPrice(totalConsidering)} considering
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Rooms */}
